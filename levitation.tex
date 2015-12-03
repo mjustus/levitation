@@ -1,0 +1,1039 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{fontenc}
+\usepackage{stmaryrd}
+
+\usepackage{pdflscape}
+
+\usepackage{tabularx}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+\usepackage{mathpartir}
+\renewcommand{\TirNameStyle}[1]{{\small #1}}
+
+\usepackage{url}
+\usepackage{hyperref}
+
+\usepackage{color}
+
+\definecolor{term}{RGB}{153,0,0}
+\definecolor{type}{RGB}{0,0,224}
+\definecolor{definition}{RGB}{0,102,0}
+\definecolor{neutral}{RGB}{102,0,102}
+
+\usepackage[top=0.75in, bottom=1in, left=1in, right=1in]{geometry}
+
+\title{Levitation without the sugar}
+
+\newcommand{\ENT}{\vdash}
+\newcommand{\OF}{:}
+\newcommand{\EQ}{\ensuremath{\mathbin{\equiv}}}
+
+\newcommand{\type}[1]{{\textcolor{type}{\textsf{#1}}}}
+\newcommand{\term}[1]{{\textcolor{term}{\textsf{#1}}}}
+\newcommand{\definition}[1]{{\textcolor{definition}{\textsf{#1}}}}
+\newcommand{\unv}[1]{{\textcolor{type}{\textsc{#1}}}}
+
+\newcommand{\name}[1]{{\textcolor{neutral}{#1}}}
+
+\newcommand{\Set}{\unv{Set}}
+\newcommand{\One}{\type{1}}
+\newcommand{\To}{\mathbin{\textcolor{type}{\shortrightarrow}}}
+\newcommand{\App}{\,}
+\newcommand{\lam}[2]{{\textcolor{term}{\lambda}}_{#1} {\name #2}.\,}
+
+\newcommand{\mult}{\mathbin{\textcolor{type}{\times}}}
+\newcommand{\proj}[1]{\mathop{\textcolor{definition}{\pi_{#1}}}}
+\newcommand{\cons}[2]{\textcolor{term}{[}#1\textcolor{term}{,}\, #2\textcolor{term}{]}}
+\newcommand{\nil}{\textcolor{term}{[]}}
+
+\newcommand{\SigmaT}[3]{\textcolor{type}{(}\name #1 \OF #2 \textcolor{type}{)} \mult #3}
+\newcommand{\PiT}[3]{\textcolor{type}{(}\name #1 \OF #2 \textcolor{type}{)} \To #3}
+
+\newcommand{\plus}{\mathbin{\textcolor{type}{+}}}
+\newcommand{\inj}[1]{\mathop{\textcolor{term}{\iota_{#1}}}}
+\newcommand{\match}[2]{\textcolor{definition}{\langle}#1\textcolor{definition}{,}\, #2\textcolor{definition}{\rangle}}
+
+
+\newcommand{\Tag}{\type{Tag}}
+\newcommand{\quot}{\textcolor{term}{`}}
+
+\newcommand{\En}{\type{En}}
+\newcommand{\nilE}{\term{nE}}
+\newcommand{\consE}[2]{\term{cE} \App {#1} \App {#2}}
+
+\newcommand{\hash}{\type{\#}}
+\newcommand{\zero}{\term{0}}
+\newcommand{\suc}{\term{1+}}
+
+\newcommand{\spi}[2]{\textcolor{definition}{\pi} \App {#1} \App {#2}}
+\newcommand{\switch}[4]{\definition{switch} \App {#1} \App {#2}  \App {#3}  \App {#4}}
+\newcommand{\spiD}[1]{\definition{$\pi$D} \App {#1}}
+\newcommand{\switchD}[3]{\definition{switchD} \App {#1} \App {#2}  \App {#3}}
+
+\newcommand{\Desc}{\type{Desc}}
+
+\newcommand{\dOne}{\quot\textcolor{term}{1}}
+\newcommand{\dSigma}{\quot\textcolor{term}{\Sigma}}
+\newcommand{\dInd}{\quot\textcolor{term}{\textsf{indx}}}
+\newcommand{\dHind}{\quot\textcolor{term}{\textsf{hindx}}}
+
+\newcommand{\cOne}{\con \App \cons \dOne \nil}
+\newcommand{\cSigma}[2]{\con \App \cons \dSigma {\cons {#1}  {\cons {#2} \nil}}}
+\newcommand{\cInd}[1]{\con \App \cons \dInd {\cons #1 \nil}}
+\newcommand{\cHind}[2]{\con \App \cons \dHind {\cons #1  {\cons #2 \nil}}}
+
+\newcommand{\uOne}{\underline{\dOne}}
+\newcommand{\uSigma}[2]{\underline{\dSigma} \App #1 \App #2}
+\newcommand{\uInd}[1]{\underline{\dInd} \App #1}
+\newcommand{\uHind}[2]{\underline{\dHind} \App #1 \App #2}
+
+\newcommand{\interp}[2]{\textcolor{definition}{\llbracket} #1 \textcolor{definition}{\rrbracket} \App #2}
+
+\newcommand{\fix}{\textcolor{type}{\mu}}
+\newcommand{\con}{\term{con}}
+\newcommand{\ind}[3]{\definition{ind} \App {#1} \App {#2}  \App {#3}}
+\newcommand{\iAll}[4]{\definition{All} \App {#1} \App {#2}  \App {#3} \App {#4}}
+\newcommand{\iall}[4]{\definition{all} \App {#1} \App {#2}  \App {#3} \App {#4}}
+
+\usepackage[backend=bibtex, firstinits=true]{biblatex}
+\begin{filecontents}{levitation.bib}
+@Book{Martin-Loef1984,
+  Title                    = {Intuitionistic Type Theory: Notes by {G}iovanni {S}ambin of a series of lectures given in {P}adua, {J}une 1980},
+  Author                   = {Martin-L\"of, Per},
+  Publisher                = {Bibliopolis},
+  Year                     = {1984},
+  Series                   = {Studies in Proof Theory}
+}
+
+@inproceedings{levitation,
+ author = {Chapman, James and Dagand, Pierre-\'{E}variste and McBride, Conor and Morris, Peter},
+ title = {The Gentle Art of Levitation},
+ booktitle = {Proceedings of the 15th ACM SIGPLAN International Conference on Functional Programming},
+ series = {ICFP '10},
+ year = {2010},
+ pages = {3--14}
+} 
+
+\end{filecontents}
+\bibliography{levitation}
+
+\begin{document}
+
+\maketitle
+
+We present the low-level type theory of ``The Gentle Art of
+Levitation''~\cite{levitation} in a more familiar rule-based style, organised
+as much as possible into the usual categories of formation, introduction,
+etc. The only real (but inconsequential) difference is that we require type
+constructor to always be fully applied. Otherwise we follow the paper closely,
+including the use of colour\footnote{See
+  \url{http://strictlypositive.org/dpm/colour.html} for the rationale behind
+  the choice of colours.} to distinguish the different categories of
+syntax. In brief, \type{type formers} are blue, \term{constructors} red,
+\definition{defined functions} green, \name{bound variables} purple, and
+meta-variables stay uncoloured.
+
+
+\section{Standard}
+
+We recall the standard rules for unit- and $\Sigma$-types,
+mainly to introduce the slightly non-standard syntax.
+
+\subsection{Unit type}
+
+\subsubsection*{Formation}
+\begin{mathpar}
+\inferrule*{\Gamma \ENT {}} {
+  \Gamma \ENT \One \OF \Set
+}
+\end{mathpar}
+
+\subsubsection*{Introduction}
+\begin{mathpar}
+\inferrule*{\Gamma \ENT {}} {
+  \Gamma \ENT \nil \OF \One
+}
+\end{mathpar}
+
+\subsection{$\Sigma$-types}
+
+\subsubsection*{Formation}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT S \OF \Set\\
+  \Gamma; {\name x \OF S} \ENT T \OF \Set
+} {
+  \Gamma \ENT \SigmaT x S T \OF \Set
+}
+\end{mathpar}
+
+\subsubsection*{Introduction}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT S \OF \Set\\
+  \Gamma; {\name x \OF S} \ENT T \OF \Set
+} {
+  \Gamma \ENT {\cons s t}_{{\name x. T}} \OF \SigmaT x S T
+}
+\end{mathpar}
+To save space, we will drop the type annotation when it is clear from the
+context. We will also write
+\begin{equation*}
+\left[
+\begin{array}{l}
+t_1\\
+\ldots\\
+t_n
+\end{array}
+\right]
+\end{equation*}
+for the right-nested pair $\cons {t_1} {\cons {\ldots} {{\cons {t_n} \nil} \ldots}}$.
+
+\subsubsection*{Elimination}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT p \OF \SigmaT x S T
+} {
+  \Gamma \ENT \proj 0 \App p \OF S
+}
+
+\inferrule*{
+  \Gamma \ENT p \OF \SigmaT x S T
+} {
+  \Gamma \ENT \proj 1 \App p \OF T [\proj 0 \App p/\name x]
+}
+\end{mathpar}
+
+\subsubsection*{Computation}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT s \OF S\\
+  \Gamma \ENT t \OF T [s/\name x]
+} {
+  \Gamma \ENT {
+    \proj 0 \App {\cons s t}_{\name x. T}
+  } \EQ {
+    s
+  } \OF S
+}
+
+\inferrule*{
+  \Gamma \ENT s \OF S\\
+  \Gamma \ENT t \OF T [s/\name x]
+} {
+  \Gamma \ENT {
+    \proj 1 \App {\cons s t}_{\name x. T}
+  } \EQ {
+    t
+  } \OF T [s/\name x]
+}
+\end{mathpar}
+
+\section{Finite sets and small products}
+
+\subsection{Tags}
+The purpose of tags is to provide the user with identifiers to be used as
+constructor names. As this is their only purpose, they only come with an
+introduction but not elimination rule.
+
+\subsubsection*{Formation}
+\begin{mathpar}
+\inferrule*{\Gamma \ENT {}} {
+  \Gamma \ENT \Tag \OF \Set
+}
+\end{mathpar}
+
+\subsubsection*{Introduction}
+\begin{mathpar}
+\inferrule*[Right=$\name s$ is a valid identifier]{\Gamma \ENT {}} {
+  \Gamma \ENT \quot \name s \OF \Set
+}
+\end{mathpar}
+The paper leaves open what it means for an identifier to be ``valid''.
+
+
+\begin{landscape}
+\subsection{Small products indexed by \En}
+
+\subsubsection*{\En-formation}
+
+\begin{tabularx}{\linewidth}{|*{3}{Y|}}
+\begin{mathpar}
+  \inferrule*{\Gamma \ENT {}} {
+    \Gamma \ENT \En \OF \Set
+  }
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule{\Gamma \ENT E \OF \En} {
+  \Gamma \ENT \hash E \OF \Set
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule{
+  \Gamma \ENT E \OF \En\\
+  \Gamma \ENT P \OF \hash E \To \Set
+} {
+  \Gamma \ENT \spi E P \OF \Set
+}
+\end{mathpar}
+\end{tabularx}
+
+\subsubsection*{\En-introduction}
+\begin{tabularx}{\linewidth}{|*{3}{Y|}}
+\begin{mathpar}
+\inferrule*{\Gamma \ENT {}} {
+  \Gamma \ENT \nilE \OF \En
+}
+\end{mathpar}
+&
+&
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT P \OF \hash \nilE \To \Set
+} {
+  \Gamma \ENT {\spi \nilE P} \EQ \One \OF \Set
+}
+\end{mathpar}
+\\
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT t \OF \Tag \\
+  \Gamma \ENT E \OF \En
+} {
+  \Gamma \ENT \consE t E \OF \En
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT t \OF \Tag\\
+  \Gamma \ENT E \OF \En
+} {
+  \Gamma \ENT \zero \OF \hash (\consE t E)
+}
+
+\inferrule*{
+  \Gamma \ENT n \OF \hash E
+} {
+  \Gamma \ENT \suc n \OF \hash (\consE t E)
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT t \OF \Tag\\\\
+  \Gamma \ENT E \OF \En\\\\
+  \Gamma \ENT P \OF \hash (\consE t E) \To \Set
+} {
+  \Gamma \ENT {
+    \spi {(\consE t E)} P
+  } \EQ {
+    P \App \zero \mult \spi E {(\lam {\hash E} x P \App (\suc \name x))}
+  } \OF \Set
+}
+\end{mathpar}
+\end{tabularx}
+
+\subsubsection*{\En-elimination}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT E \OF \En\\
+  \Gamma \ENT P \OF \hash E \To \Set\\
+  \Gamma \ENT b \OF \spi E P\\
+  \Gamma \ENT x \OF \hash E
+} {
+  \Gamma \ENT \switch E P b x \OF P \App x
+}
+\end{mathpar}
+
+\subsubsection*{\En-computation}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT t \OF \Tag\\
+  \Gamma \ENT E \OF \En\\
+  \Gamma \ENT P \OF \hash (\consE t E) \To \Set\\\\
+  \Gamma \ENT b \OF P \App \zero \mult \spi E {(\lam {\hash E} x P \App (\suc \name x))}
+} {
+  \Gamma \ENT {
+    \switch {(\consE t E)} P b \zero
+   } \EQ {
+     \proj 0 b
+   } \OF P \App \zero
+}
+
+\inferrule*{
+  \Gamma \ENT t \OF \Tag\\
+  \Gamma \ENT E \OF \En\\
+  \Gamma \ENT P \OF \hash (\consE t E) \To \Set\\\\
+  \Gamma \ENT b \OF P \App \zero \mult \spi E {(\lam {\hash E} x P \App (\suc \name x))}\\\\
+  \Gamma \ENT x \OF \hash E
+} {
+  \Gamma \ENT {
+    \switch {(\consE t E)} P b {(\suc x)}
+   } \EQ {
+     \switch E {(\lam {\hash E} x P \App (\suc \name x))} {(\proj 1 b)} x
+   } \OF P (\suc \name x)
+}
+\end{mathpar}
+\end{landscape}
+
+
+\section{Descriptions and their interpretation}
+
+\subsection{Descriptions}
+
+\subsubsection*{\Desc-formation}
+Again, this is Tarski-style universe construction.
+
+\noindent\begin{tabularx}{\linewidth}{|*{2}{Y|}}
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT {}
+} {
+  \Gamma \ENT \Desc \OF \Set
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT D \OF \Desc\\
+  \Gamma \ENT X \OF \Set
+} {
+  \Gamma \ENT \interp D X \OF \Set
+}
+\end{mathpar}
+\end{tabularx}
+
+\subsubsection*{\Desc-introduction}
+We do need any rules introducing \Desc-codes as they will be generated by
+levitation (see below). The resulting constructors are listed on the left-hand
+side together with suitable abbreviations, which are for our convenience only
+and not part of the type theory.
+
+\noindent\begin{tabularx}{\linewidth}{|*{2}{Y|}}
+\begin{mathpar}
+\uOne := \cOne
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT X \OF \Set
+} {
+  \Gamma \ENT {\interp \uOne X} \EQ \One \OF \Set
+}
+\end{mathpar}
+\\
+\begin{mathpar}
+\uSigma S D := \cSigma S D
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT X \OF \Set\\
+  \Gamma \ENT D \OF S \To \Desc\\
+  \Gamma \ENT S \OF \Set
+} {
+  \Gamma \ENT {
+    \interp {\uSigma S D} X
+  } \EQ {
+    \SigmaT s S {\interp {D \App \name s} X}
+  } \OF \Set
+}
+\end{mathpar}
+\\
+\begin{mathpar}
+\uInd D := \cInd D
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT X \OF \Set\\
+  \Gamma \ENT D \OF \Desc
+} {
+  \Gamma \ENT {
+    \interp {\uInd D} X
+  } \EQ {
+    X \mult {\interp D X}
+  } \OF \Set
+}
+\end{mathpar}
+\\
+\begin{mathpar}
+\uHind H D := \cHind H D
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT X \OF \Set\\
+  \Gamma \ENT H \OF \Set\\
+  \Gamma \ENT D \OF \Desc
+} {
+  \Gamma \ENT {
+    \interp {\uHind H D} X
+  } \EQ {
+    (H \To X) \mult {\interp D X}
+  } \OF \Set
+}
+\end{mathpar}
+\end{tabularx}
+
+\subsubsection*{\Desc-levitation}
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT {}
+} {
+  \Gamma \ENT
+    \Desc
+  \EQ {
+    \fix {
+      \left(\uSigma
+        {\hash \underline {\term E}}
+        {\left(\lam {\hash \underline {\term E}} x \switchD {\underline {\term E}}
+{\left[
+\begin{array}{l}
+\uOne\\
+\uSigma \Set {(\lam \Set S \uHind {\name S} \uOne)}\\
+\uInd \uOne\\
+\uSigma {\Set} {(\lam \Set \_ \uInd \uOne)}
+\end{array}
+\right]}
+{\name x}\right)}
+      \right)
+    }
+  } \OF \Set
+}
+\end{mathpar}
+where $\underline {\term E}$ is the enumeration $\consE \dOne {(\consE \dSigma {(\consE \dInd {(\consE \dHind \nilE)})})}$.
+
+
+%%%
+% switchD using spi
+%%%
+\subsection{Eliminating small products of descriptions}
+
+\subsubsection*{Elimination}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT E \OF \En\\
+  \Gamma \ENT b \OF \spi E {(\lam {\hash E} \_ \Desc)}\\
+  \Gamma \ENT x \OF \hash E
+} {
+  \Gamma \ENT \switchD E b x \OF \Desc
+}
+\end{mathpar}
+
+\subsubsection*{Computation}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT t \OF \Tag\\
+  \Gamma \ENT E \OF \En\\
+  \Gamma \ENT b \OF \Desc \mult \spi E {(\lam {\hash E} \_ \Desc)}
+} {
+  \Gamma \ENT {
+    \switchD {(\consE t E)} b \zero
+   } \EQ {
+     \proj 0 b
+   } \OF P \App \zero
+}
+
+\inferrule*{
+  \Gamma \ENT t \OF \Tag\\
+  \Gamma \ENT E \OF \En\\
+  \Gamma \ENT b \OF \Desc \mult \spi E {(\lam {\hash E} \_ \Desc)}\\
+  \Gamma \ENT x \OF \hash E
+} {
+  \Gamma \ENT {
+    \switchD {(\consE t E)} b {(\suc x)}
+   } \EQ {
+     \switchD E {(\proj 1 b)} x
+   } \OF \Desc
+}
+\end{mathpar}
+
+\subsection{Fixpoint}
+
+\subsubsection*{Formation}
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT D \OF \Desc
+} {
+  \Gamma \ENT \fix D \OF \Set
+}
+\end{mathpar}
+
+\subsubsection*{Introduction}
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT D \OF \Desc\\
+  \Gamma \ENT d \OF \interp D {(\fix D)}
+} {
+  \Gamma \ENT \con \App d \OF \fix D
+}
+\end{mathpar}
+
+\subsubsection*{Elimination}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT D \OF \Desc\\\\
+  \Gamma \ENT P \OF \fix D \To \Set\\\\
+  \Gamma \ENT m \OF \textcolor{type}{(} \name d \OF \interp {D} {(\fix D)} \textcolor{type}{)} \To \iAll D {(\fix D)} P {\name d} \To P \App (\con \App {\name d})\\\\
+  \Gamma \ENT x \OF \fix D
+} {
+  \Gamma \ENT \ind D P m \App x \OF P \App x
+}
+\end{mathpar}
+
+\subsubsection*{Computation}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT D \OF \Desc\\\\
+  \Gamma \ENT P \OF \fix D \To \Set\\\\
+  \Gamma \ENT m \OF \textcolor{type}{(} \name d \OF \interp {D} {(\fix D)} \textcolor{type}{)} \To \iAll D {(\fix D)} P {\name d} \To P \App (\con \App {\name d})\\\\
+  \Gamma \ENT d \OF \interp D {(\fix D)}
+} {
+  \Gamma \ENT {
+    \ind D P m \App {(\con \App d)}
+  } \EQ {
+    m \App d \App (\iall D {(\fix D)} P {(\ind D P m)} \App d)
+  } \OF P \App x
+}
+\end{mathpar}
+
+\begin{landscape}
+\subsection{\definition{All} predicate}
+
+\subsubsection*{Formation}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT D \OF \Desc\\
+  \Gamma \ENT X \OF \Set\\
+  \Gamma \ENT P \OF X \To \Set\\
+  \Gamma \ENT xs \OF \interp D X
+} {
+  \Gamma \ENT \iAll D X P xs \OF \Set
+}
+\end{mathpar}
+
+\subsubsection*{Introduction'}
+\begin{tabularx}{\linewidth}{|*{2}{Y|}}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT X \OF \Set\\\\
+  \Gamma \ENT P \OF X \To \Set
+} {
+  \Gamma \ENT {
+    \iAll \uOne X P {\nil}
+  } \EQ \One \OF \Set
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT X \OF \Set\\\\
+  \Gamma \ENT P \OF X \To \Set\\
+  \Gamma \ENT p \OF \PiT x X {P \App {\name x}}
+} {
+  \Gamma \ENT {
+    \iall \uOne X P p \, \nil
+  } \EQ \nil \OF \One
+}
+\end{mathpar}
+\\
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT S \OF \Set\\
+  \Gamma \ENT D \OF S \To \Desc\\
+  \Gamma \ENT X \OF \Set\\\\
+  \Gamma \ENT P \OF X \To \Set
+} {
+  \Gamma \ENT {
+    \iAll {(\uSigma S D)} X P {\cons s d}
+  } \EQ {
+    \iAll {(D \, s)} X P d
+  } \OF \Set
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT S \OF \Set\\
+  \Gamma \ENT D \OF S \To \Desc\\
+  \Gamma \ENT X \OF \Set\\\\
+  \Gamma \ENT P \OF X \To \Set\\
+  \Gamma \ENT p \OF \PiT x X {P \App {\name x}}\\\\
+  \Gamma \ENT s \OF S\\
+  \Gamma \ENT d \OF D \App s
+} {
+  \Gamma \ENT {
+    \iall {(\uSigma S D)} X P p \App {\cons s d}
+  } \EQ {
+    \iall {(D \, s)} X P p \App d
+  } \OF \iAll {(D \, s)} X P d
+}
+\end{mathpar}
+\\
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT D \OF \Desc\\
+  \Gamma \ENT X \OF \Set\\\\
+  \Gamma \ENT P \OF X \To \Set
+} {
+  \Gamma \ENT {
+    \iAll {(\uInd D)} X P {\cons x d}
+  } \EQ {
+    P \App x \mult \iAll D X P d
+  } \OF \Set
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT D \OF \Desc\\
+  \Gamma \ENT X \OF \Set\\\\
+  \Gamma \ENT P \OF X \To \Set\\
+  \Gamma \ENT p \OF \PiT x X {P \App {\name x}}\\\\
+  \Gamma \ENT x \OF X\\
+  \Gamma \ENT d \OF D
+} {
+  \Gamma \ENT {
+    \iall {(\uInd D)} X P p \App {\cons x d}
+  } \EQ {
+    \cons {p \App x} {\iall D X P p \App d}
+  } \OF P \App x \mult \iAll D X P d
+}
+\end{mathpar}
+\\
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT H \OF \Set\\
+  \Gamma \ENT D \OF \Desc\\
+  \Gamma \ENT X \OF \Set\\\\
+  \Gamma \ENT P \OF X \To \Set
+} {
+  \Gamma \ENT {
+    \iAll {(\uHind H D)} X P {\cons f d}
+  } \EQ {
+    (\PiT h H {P \App (f \App {\name h})}) \mult \iAll D X P d
+  } \OF \Set
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT H \OF \Set\\
+  \Gamma \ENT D \OF \Desc\\
+  \Gamma \ENT X \OF \Set\\\\
+  \Gamma \ENT P \OF X \To \Set\\
+  \Gamma \ENT p \OF \PiT x X {P \App {\name x}}\\\\
+  \Gamma \ENT f \OF H \To X\\
+  \Gamma \ENT d \OF D
+} {
+  \Gamma \ENT {
+    \iall {(\uHind H D)} X P p \App {\cons f d}
+  } \EQ {
+    \cons {\lam H h {p \App (f \App {\name h})}} {\iall D X P p \App d}
+  } \OF (\PiT h H {P \App (f \App {\name h})}) \mult \iAll D X P d
+}
+\end{mathpar}
+\end{tabularx}
+\end{landscape}
+
+\printbibliography
+
+\appendix
+
+%%%
+% \En using switchD only
+%%%
+\section{Small products of descriptions}
+We spent a lot of effort to define small products over arbitrary types, only
+to then introduce a special-cased projection function, \definition{switchD}, restricted to
+products of descriptions. Below we give an alternative definition of
+\definition{switchD} using small products of descriptions from the start.
+
+\subsubsection*{\En-formation}
+
+\begin{tabularx}{\linewidth}{|*{3}{Y|}}
+\begin{mathpar}
+  \inferrule*{\Gamma \ENT {}} {
+    \Gamma \ENT \En \OF \Set
+  }
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule{\Gamma \ENT E \OF \En} {
+  \Gamma \ENT \hash E \OF \Set
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule{
+  \Gamma \ENT E \OF \En
+} {
+  \Gamma \ENT \spiD E \OF \Set
+}
+\end{mathpar}
+\end{tabularx}
+
+\subsubsection*{\En-introduction}
+\begin{tabularx}{\linewidth}{|*{3}{Y|}}
+\begin{mathpar}
+\inferrule*{\Gamma \ENT {}} {
+  \Gamma \ENT \nilE \OF \En
+}
+\end{mathpar}
+&
+&
+\begin{mathpar}
+\inferrule*{ } {
+  \Gamma \ENT {\spiD \nilE} \EQ \One \OF \Set
+}
+\end{mathpar}
+\\
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT t \OF \Tag \\
+  \Gamma \ENT E \OF \En
+} {
+  \Gamma \ENT \consE t E \OF \En
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT t \OF \Tag\\
+  \Gamma \ENT E \OF \En
+} {
+  \Gamma \ENT \zero \OF \hash (\consE t E)
+}
+
+\inferrule*{
+  \Gamma \ENT n \OF \hash E
+} {
+  \Gamma \ENT \suc n \OF \hash (\consE t E)
+}
+\end{mathpar}
+&
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT t \OF \Tag\\\\
+  \Gamma \ENT E \OF \En
+} {
+  \Gamma \ENT {
+    \spiD {(\consE t E)}
+  } \EQ {
+    \Desc \mult \spiD E
+  } \OF \Set
+}
+\end{mathpar}
+\end{tabularx}
+
+\subsubsection*{\En-elimination}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT E \OF \En\\
+  \Gamma \ENT b \OF \spiD E\\
+  \Gamma \ENT x \OF \hash E
+} {
+  \Gamma \ENT \switchD E b x \OF \Desc
+}
+\end{mathpar}
+
+\subsubsection*{\En-computation}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT t \OF \Tag\\
+  \Gamma \ENT E \OF \En\\
+  \Gamma \ENT b \OF \Desc \mult \spiD E
+} {
+  \Gamma \ENT {
+    \switchD {(\consE t E)} b \zero
+   } \EQ {
+     \proj 0 b
+   } \OF P \App \zero
+}
+
+\inferrule*{
+  \Gamma \ENT t \OF \Tag\\
+  \Gamma \ENT E \OF \En\\
+  \Gamma \ENT b \OF \Desc \mult \spiD E\\
+  \Gamma \ENT x \OF \hash E
+} {
+  \Gamma \ENT {
+    \switchD {(\consE t E)} b {(\suc x)}
+   } \EQ {
+     \switchD E {(\proj 1 b)} x
+   } \OF \Desc
+}
+\end{mathpar}
+
+\section{Is {\En} really necessary?}
+
+Given a type with exactly four inhabitants, it ought to be possible to
+eliminate the use of {\En} in the levitation rule defining \Desc, using each
+of the four inhabitants to name one constructor of \Desc.
+
+To encode such a type, we add binary sums to the type system. Another approach
+would be to introduce a {\type {Bool}} type and encode binary sums as
+$A \plus B \triangleq \SigmaT b {\type{Bool}} \term{if} ~ {\name b} \term ~
+\term{then} ~ A ~ \term{else} ~ B$. Yet another would be to add a four-element
+type as a primitive.
+
+\subsection{$\textcolor{blue}{+}$-types}
+
+\subsubsection*{Formation}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT S \OF \Set\\
+  \Gamma \ENT T \OF \Set
+} {
+  \Gamma \ENT S \plus T  \OF \Set
+}
+\end{mathpar}
+
+\subsubsection*{Introduction}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT s \OF S\\
+  \Gamma \ENT T \OF \Set 
+} {
+  \Gamma \ENT \inj 0 s \OF S \plus T
+}
+
+\inferrule*{
+  \Gamma \ENT S \OF \Set\\
+  \Gamma \ENT t \OF T
+} {
+  \Gamma \ENT \inj 1 s \OF S \plus T
+}
+\end{mathpar}
+
+\subsubsection*{Elimination}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT f \OF S \To X\\
+  \Gamma \ENT g \OF T \To X\\
+  \Gamma \ENT e \OF S \plus T\\
+} {
+  \Gamma \ENT \match f  g \, e \OF X
+}
+\end{mathpar}
+
+\subsubsection*{Computation}
+\begin{mathpar}
+\inferrule*{
+  \Gamma \ENT f \OF S \To X\\
+  \Gamma \ENT g \OF T \To X\\
+  \Gamma \ENT s \OF S
+} {
+  \Gamma \ENT {
+    \match f g \App {(\inj 0 s)}
+  } \EQ {
+    f \App s
+  } \OF X
+}
+
+\inferrule*{
+  \Gamma \ENT f \OF S \To X\\
+  \Gamma \ENT g \OF T \To X\\
+  \Gamma \ENT t \OF T
+} {
+  \Gamma \ENT {
+    \match f g \App {(\inj 1 t)}
+  } \EQ {
+    g \App t
+  } \OF X
+}
+\end{mathpar}
+
+\subsection{A type with exactly four inhabitants}
+
+Let $\underline {\type 4}$ be the type give by $\One \plus {(\One \plus {(\One \plus \One)})}$. Its only inhabitants are
+\begin{align*}
+\underline{\term 0} &:= \inj 0 \App \nil\\
+\underline{\term 1} &:= \inj 1 \App (\inj 0 \App \nil)\\
+\underline{\term 2} &:= \inj 1 \App (\inj 1 \App (\inj 0 \App \nil))\\
+\underline{\term 3} &:= \inj 1 \App (\inj 1 \App (\inj 1 \App (\inj 0 \App \nil)))
+\end{align*}
+Furthermore, we can define an eliminator
+\begin{equation*}
+\underline {\definition{switch4}} \App a \App b \App c \App d \App x :=
+\match
+  {\lam \One \_ a}
+  {\lam
+    {\One\plus\One\plus\One} x
+    {\match
+      {\lam \One \_ b}
+      {\lam {\One\plus\One} x
+        {\match {{\lam \One \_ c}} {{\lam \One \_ d}}}
+      \App x}
+    }
+    \App x
+  }
+  \App x
+\end{equation*}
+that exhibits the desired computational behaviour.
+
+Using this encoding, we can express the levitation rules without use of \En:
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT {}
+} {
+  \Gamma \ENT
+    \Desc
+  \EQ {
+    \fix {
+      \left(\uSigma
+        {\underline {\type 4}}
+        {\left(\lam {\underline {\type 4}} x \underline {\definition{switch4}} \App
+\uOne \App
+(\uSigma \Set {(\lam \Set S \uHind {\name S} \uOne)}) \App
+(\uInd \uOne) \App
+(\uSigma {\Set} {(\lam \Set \_ \uInd \uOne)}) \App
+{\name x}\right)}
+      \right)
+    }
+  } \OF \Set
+}
+\end{mathpar}
+where 
+\begin{align*}
+\uOne &:= \con \App \cons {\underline{\term 0}} \nil\\
+\uSigma \App S \App D &:= \con \App \cons {\underline{\term 1}} {\cons S  {\cons D \nil}}\\
+\uInd \App D &:= \con \App \cons {\underline{\term 2}} {\cons D \nil}\\
+\uHind \App H \App D &:= \con \App \cons {\underline{\term 3}} {\cons H  {\cons D \nil}}
+\end{align*}
+
+\section{Can we levitate \One?}
+
+Instead of having a built-in unit type, can we introduce it using levitation
+just like we did with \Desc? In other words, can we replace the introduction
+rule of {\One} by a computation rule
+$\Gamma \ENT \One \EQ \fix \uOne \OF \Set$?
+
+Using this alternative rule, let us try to construct its (hopefully) unique
+inhabitant using the ${\fix}$-introduction rule
+\begin{mathpar}
+\inferrule* {
+  \Gamma \ENT d \OF \interp \uOne {(\fix \uOne)} \EQ \fix \uOne
+} {
+  \Gamma \ENT \con \App d \OF \fix \uOne
+}
+\end{mathpar}
+
+which tells us that any inhabitant must be of shape $\con \, d$, where $d$ is
+again of type $\fix \uOne$. We have hit an infinite regress, meaning that no
+inhabitant can be constructed.
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
